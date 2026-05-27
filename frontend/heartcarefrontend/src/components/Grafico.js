@@ -31,58 +31,29 @@ function Grafico(props) {
                     filtrate.push(Object.values(props.misurazioni[index]["misurazione"]));
                     attributiFiltrati = Object.keys(props.misurazioni[index]["misurazione"])
                 }
-            }
-        )
-        attributiFiltrati.shift();
-            filtrate.map((misurazione) =>{
-                misurazione.shift();
             })
+            return [filtrate,attributiFiltrati];
     }
 
-    let tmpDataGrafico = [];
-    const riempiDatiGrafico = () => {
-        tmpDataGrafico.push(attributiFiltrati);
-        for(let i = 0; i<filtrate.length; i++) {
-            tmpDataGrafico.push(filtrate[i])
-        }
-    }
-
-    useEffect( () => {
-        if(isChange){
-            filterByCategoria(categoriaSelezionata);
-            setDataGrafico(tmpDataGrafico);
-            riempiDatiGrafico();
-            setIsChange(false);
-        }
-    }, [isChange])
-
-   const handlerOnChange = (event) => {
-       document.getElementById("grafico").style.display = "block";
-       let cat = event.target.value;
-       setCategoriaSelezionata(cat);
-       setIsChange(true);
-
-    }
+    useEffect(() => {
+        const [filtrate,attributiFiltrati] = filterByCategoria(categoriaSelezionata);
+        setDataGrafico(filtrate);
+    }, [categoriaSelezionata]);
 
     return (
-            <div className="contenitoreGrafico">
-                <span className="titoloGrafico">Andamento misurazioni passate:</span>
-                <div id="grafico" style={{display:"none"}}>
-                <Chart
-                    className="grafico"
-                    chartType="Line"
-                    width="100%"
-                    height="400px"
-                    data={dataGrafico}
-                /></div>
-                <select id = "selectCategoria" className="selectMisurazione" onChange={(e) => handlerOnChange(e)}>
-                    <option value="" disabled selected>Scegli una categoria</option>
-                    {props.categorie.map( c => {
-                        return <option key ={c.id} value ={c.value} >{c}</option>
-                    })}
-                </select>
-            </div>
+        <div>
+            <Chart
+                chartType="BarChart"
+                data={dataGrafico}
+                options={{
+                    title: 'Grafico',
+                    hAxis: {title: 'X', titleTextStyle: {color: '#333'}},
+                    vAxis: {title: 'Y', titleTextStyle: {color: '#333'}},
+                }}
+                width={'100%'}
+                height={'400px'}
+                legendToggle
+            />
+        </div>
     );
 }
-
-export default Grafico;
