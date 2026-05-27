@@ -133,30 +133,6 @@ function createMatcher(term, camelCase) {
             // ',' and '?' are the only delimiters commonly followed by space in java signatures
             pattern += "(" + $.ui.autocomplete.escapeRegex(s).replace(/[,?]/g, "$&\\s*?") + ")";
             upperCase.push(false);
-            var isWordToken =  /\w$/.test(s);
-            if (isWordToken) {
-                if (i === tokens.length - 1 && index < array.length - 1) {
-                    // space in query string matches all delimiters
-                    pattern += "(.*?)";
-                    upperCase.push(isUpperCase(s[0]));
-                } else {
-                    if (!camelCase && isUpperCase(s) && s.length === 1) {
-                        pattern += "()";
-                    } else {
-                        pattern += "([a-z0-9$<>?[\\]]*?)";
-                    }
-                    upperCase.push(isUpperCase(s[0]));
-                }
-            } else {
-                pattern += "()";
-                upperCase.push(false);
-            }
-        }
-    });
-    var re = new RegExp(pattern, "gi");
-    re.upperCase = upperCase;
-    return re;
-}
 function analyzeMatch(matcher, input, startOfName, category) {
     var from = startOfName;
     matcher.lastIndex = from;
@@ -174,6 +150,17 @@ function analyzeMatch(matcher, input, startOfName, category) {
     var leftParen = input.indexOf("(");
     // exclude peripheral matches
     if (category !== "modules" && category !== "searchTags") {
+        // Use a safer way to create a regex pattern
+        var pattern = matcher.source;
+        var re = new RegExp(pattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), "gi");
+        re.upperCase = matcher.upperCase;
+        return re;
+    } else {
+        var re = new RegExp(matcher.source, "gi");
+        re.upperCase = matcher.upperCase;
+        return re;
+    }
+}
         if (leftParen > -1 && leftParen < match.index) {
             return NO_MATCH;
         } else if (startOfName - 1 >= matchEnd) {

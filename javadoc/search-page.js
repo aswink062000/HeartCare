@@ -96,7 +96,7 @@ $(window).on("load", function() {
             "types": [],
             "members": [],
             "packages": [],
-            "modules": [],
+"modules": [],
             "searchTags": []
         };
         for (var i in result) {
@@ -137,6 +137,51 @@ $(window).on("load", function() {
             var id = "#result-tab-" + key.replace("searchTags", "search_tags");
             if (r[key].length) {
                 var count = r[key].length >= 1000 ? "999+" : r[key].length;
+                var tab = $("<div class='table-tab'></div>")
+                    .attr("id", id)
+                    .attr("data-category", key)
+                    .attr("data-count", count)
+                    .text(key)
+                    .appendTo(tabContainer);
+                visibleTabs.push(tab);
+            }
+        }
+        if (categoryCount > 1) {
+            var tabSwitcher = $("<div class='tab-switcher'></div>").appendTo(resultContainer);
+            var prevTab = $("<div class='tab-switcher-prev'></div>")
+                .text("Prev")
+                .click(function() {
+                    var currentActiveTab = activeTab;
+                    var prevActiveTab = Object.keys(r).reduce(function(prev, curr) {
+                        if (r[curr].length > 0 && r[curr][0].score > prev) {
+                            return curr;
+                        }
+                        return prev;
+                    }, 0);
+                    if (prevActiveTab !== currentActiveTab) {
+                        activeTab = prevActiveTab;
+                        updateTab();
+                    }
+                })
+                .appendTo(tabSwitcher);
+            var nextTab = $("<div class='tab-switcher-next'></div>")
+                .text("Next")
+                .click(function() {
+                    var currentActiveTab = activeTab;
+                    var nextActiveTab = Object.keys(r).reduce(function(prev, curr) {
+                        if (r[curr].length > 0 && r[curr][0].score > prev) {
+                            return curr;
+                        }
+                        return prev;
+                    }, 0);
+                    if (nextActiveTab !== currentActiveTab) {
+                        activeTab = nextActiveTab;
+                        updateTab();
+                    }
+                })
+                .appendTo(tabSwitcher);
+        }
+        updateTab();
                 if (result.length > 20 && categoryCount > 1) {
                     var button = $("<button id='result-tab-" + key
                         + "' class='page-search-header'><span>" + categories[key] + "</span>"
